@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TEST 2 — Reading</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b0b0d;color:#f5f5f7;font-family:Arial,Helvetica,sans-serif}
+.top{position:sticky;top:0;z-index:10;background:#0b0b0df5;padding:18px 5vw 12px;backdrop-filter:blur(12px)}
+.title{text-align:center;font-weight:700;font-size:18px}.sub{text-align:center;color:#aaa;font-size:13px;margin-top:5px}
+.progress{display:flex;gap:4px;max-width:1000px;margin:18px auto 0}.seg{height:6px;flex:1;border-radius:5px;background:#242428}.seg.done{background:#777}.seg.active{background:#aaa}
+.wrap{max-width:900px;margin:auto;padding:42px 20px 100px}.card{display:none}.card.active{display:block}
+.type{font-size:14px;color:#a8a8ad;margin-bottom:16px}.q{font-size:25px;line-height:1.5;margin-bottom:25px}
+.opt{background:#17171a;border-radius:17px;padding:17px 20px;margin:10px 0;border:1px solid transparent;cursor:pointer;line-height:1.45}
+.opt:hover{background:#1e1e22}.opt.selected{border-color:#777}
+.opt.correct{background:#17351e;border-color:#62d57a}.opt.wrong{background:#3a171c;border-color:#ff6675}
+.feedback{display:none;margin-top:16px;padding:15px 17px;border-radius:13px;font-size:16px;line-height:1.5}
+.feedback.ok{display:block;background:#15351d}.feedback.bad{display:block;background:#3b171c}
+.answer{font-weight:700}
+input.text{width:100%;max-width:700px;background:#17171a;color:#fff;border:1px solid #666;border-radius:12px;padding:15px;font-size:19px;outline:none}
+input.text:focus{border-color:#aaa}
+.check{margin-top:14px;background:#315be8;color:#fff;border:0;border-radius:11px;padding:12px 22px;font-size:16px;cursor:pointer}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#0b0b0df5;padding:12px 5vw;display:flex;justify-content:center;gap:12px;z-index:10;backdrop-filter:blur(12px)}
+button.navbtn{border:0;border-radius:12px;padding:12px 23px;font-size:16px;cursor:pointer}.back{background:#222;color:#ddd}.next{background:#315be8;color:#fff}
+.result{display:none;text-align:center}.score{font-size:28px;font-weight:700;margin-bottom:12px}
+select{width:100%;max-width:700px;background:#17171a;color:#fff;border:1px solid #666;border-radius:12px;padding:14px;font-size:18px}
+.small{color:#999;font-size:13px}
+.final{background:#17171a;border-radius:16px;padding:22px;margin-top:30px}
+.summary{display:none;text-align:center}.summary h1{font-size:34px;margin:10px 0 25px}.scoreRing{font-size:30px;font-weight:700;margin:10px auto 8px}.summaryStats{color:#aaa;margin-bottom:28px}.reviewBtn{background:#242428;color:#fff;border:0;border-radius:14px;padding:15px 28px;font-size:17px;cursor:pointer}.reviewGrid{display:grid;grid-template-columns:repeat(10,1fr);gap:9px;margin-top:24px}.reviewItem{border:0;border-radius:9px;padding:10px 5px;font-weight:700;color:#fff;cursor:pointer}.reviewCorrect{background:#3a9d52}.reviewWrong{background:#c84655}.reviewSkipped{background:#333}.reviewTitle{font-size:18px;margin-top:25px}.legend{display:flex;justify-content:center;gap:18px;color:#aaa;font-size:13px;margin-top:14px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}.green{background:#3a9d52}.red{background:#c84655}.gray{background:#555}
+@media(max-width:600px){.q{font-size:21px}.opt{padding:15px}.wrap{padding-top:30px}.reviewGrid{grid-template-columns:repeat(5,1fr)}}
+</style>
+
+<style id="phone-app">
+html,body{width:100%;min-width:0;overflow-x:hidden}
+body{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+.wrap{width:100%;max-width:920px;margin:0 auto;padding:16px}
+#quiz{width:100%}
+.card{width:100%;max-width:100%}
+.q{font-size:clamp(19px,5.5vw,27px);line-height:1.45;word-break:normal}
+.opt{width:100%;min-height:56px;margin:9px 0;padding:16px !important;font-size:17px !important;line-height:1.4;cursor:pointer}
+input[type=text],input[type=number]{width:100%;min-height:54px;padding:14px 15px;font-size:18px;border-radius:12px}
+.nav{position:sticky;bottom:0;z-index:50;width:calc(100% + 32px);margin-left:-16px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;background:rgba(20,20,22,.97)}
+.navbtn{min-height:52px!important;flex:1;font-size:16px!important}
+.summary{width:100%;padding:20px 14px!important}
+.reviewGrid{grid-template-columns:repeat(5,1fr)!important;gap:8px!important}
+.reviewItem{min-height:48px}
+@media(min-width:700px){.reviewGrid{grid-template-columns:repeat(10,1fr)!important}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="title">TEST 2 — READING</div>
+  <div class="sub" id="counter">Question 1 / 40</div>
+  <div class="progress" id="progress"></div>
+</div>
+<div class="wrap">
+  <div class="summary" id="summary">
+    <div class="type">TEST 2 • COMPLETED</div>
+    <h1>Score</h1>
+    <div class="scoreRing" id="scoreText">0/40</div>
+    <div class="summaryStats" id="statsText">0 skipped · 0 incorrect</div>
+    <button class="reviewBtn" id="reviewBtn">Review</button>
+    <div class="reviewTitle">Review questions</div>
+    <div style="color:#999;font-size:13px;margin-top:6px">Tap a number to jump straight to that question.</div>
+    <div class="legend">
+      <span><i class="dot green"></i>Correct</span>
+      <span><i class="dot red"></i>Incorrect</span>
+      <span><i class="dot gray"></i>Skipped</span>
+    </div>
+    <div class="reviewGrid" id="reviewGrid"></div>
+  </div>
+  <div id="quiz"></div>
+  <div id="finishFallback" style="display:none;text-align:center;margin:25px 0;">
+    <button class="reviewBtn" onclick="showSummary()">Finish &amp; See Score</button>
+  </div>
+</div>
+<div class="nav">
+  <button class="navbtn back" id="back">Back</button>
+  <button class="navbtn next" id="next">Next</button>
+  <button class="navbtn reviewBack" id="reviewBack" style="display:none">Back to score summary</button>
+</div>
+
+<script>
+const qs = [
+{n:1,type:"Questions 1–5 • ONE WORD ONLY",q:"The boat was discovered during the construction of a ______.",text:true,ans:["road"]},
+{n:2,type:"Questions 1–5 • ONE WORD ONLY",q:"In 2002, an international ______ was hosted to bring together different traditions.",text:true,ans:["conference"]},
+{n:3,type:"Questions 1–5 • ONE WORD ONLY",q:"Detailed ______ to reconstruct the boat were drawn up in 2004.",text:true,ans:["proposals"]},
+{n:4,type:"Questions 1–5 • ONE WORD ONLY",q:"In 2007, the ______ of the BOAT 1550BC book took place.",text:true,ans:["launch"]},
+{n:5,type:"Questions 1–5 • ONE WORD ONLY",q:"In 2012, the Bronze-Age boat was featured in an ______.",text:true,ans:["exhibition"]},
+
+{n:6,type:"Questions 6–9 • TRUE / FALSE / NOT GIVEN",q:"Archaeologists realized that the boat had been damaged on purpose.",opts:["TRUE","FALSE","NOT GIVEN"],ans:["TRUE"]},
+{n:7,type:"Questions 6–9 • TRUE / FALSE / NOT GIVEN",q:"Initially, only the technological aspects of the boat were examined.",opts:["TRUE","FALSE","NOT GIVEN"],ans:["FALSE"]},
+{n:8,type:"Questions 6–9 • TRUE / FALSE / NOT GIVEN",q:"Archaeologists went back to the site to try and find the missing northern end.",opts:["TRUE","FALSE","NOT GIVEN"],ans:["FALSE"]},
+{n:9,type:"Questions 6–9 • TRUE / FALSE / NOT GIVEN",q:"Evidence found in 2004 suggested that the Bronze-Age boat had been used for trade.",opts:["TRUE","FALSE","NOT GIVEN"],ans:["NOT GIVEN"]},
+
+{n:10,type:"Questions 10–13 • NO MORE THAN THREE WORDS AND/OR A NUMBER",q:"How far under the ground was the boat found?",text:true,ans:["6 meters","6 metres","6 meter","6 metre"]},
+{n:11,type:"Questions 10–13 • NO MORE THAN THREE WORDS AND/OR A NUMBER",q:"What natural material had been secured to the boat to prevent water entering?",text:true,ans:["moss","pads of moss"]},
+{n:12,type:"Questions 10–13 • NO MORE THAN THREE WORDS AND/OR A NUMBER",q:"What aspect of the boat was the focus of the 2012 reconstruction?",text:true,ans:["hull shape"]},
+{n:13,type:"Questions 10–13 • NO MORE THAN THREE WORDS AND/OR A NUMBER",q:"Which two factors influenced the decision not to make a full-scale reconstruction of the boat?",text:true,ans:["cost and time","time and cost"]},
+
+{n:14,type:"Questions 14–18 • MATCHING INFORMATION",q:"The example of research on weather prediction on agriculture.",opts:["A","B","C","D","E","F"],ans:["D"]},
+{n:15,type:"Questions 14–18 • MATCHING INFORMATION",q:"Antarctic sea ice brings life back to the world's oceans' vitality.",opts:["A","B","C","D","E","F"],ans:["F"]},
+{n:16,type:"Questions 14–18 • MATCHING INFORMATION",q:"A food chain that influences the animals' living pattern based on Antarctic fresh sea ice.",opts:["A","B","C","D","E","F"],ans:["E"]},
+{n:17,type:"Questions 14–18 • MATCHING INFORMATION",q:"The explanation of how atmospheric pressure above Antarctica can impose an effect on global climate change.",opts:["A","B","C","D","E","F"],ans:["C"]},
+{n:18,type:"Questions 14–18 • MATCHING INFORMATION",q:"Antarctica was once thought to be a forgotten and insignificant continent.",opts:["A","B","C","D","E","F"],ans:["A"]},
+
+{n:19,type:"Questions 19–21 • MATCHING FACTORS",q:"Globally, Antarctica's size and ______ would influence our climate.",opts:["A. Antarctic Circumpolar Current (ACC)","B. katabatic winds","C. rainfall","D. temperature","E. glaciers","F. pressure"],ans:["D"]},
+{n:20,type:"Questions 19–21 • MATCHING FACTORS",q:"______ circulated under countervailing force from wind blowing from the west.",opts:["A. Antarctic Circumpolar Current (ACC)","B. katabatic winds","C. rainfall","D. temperature","E. glaciers","F. pressure"],ans:["A"]},
+{n:21,type:"Questions 19–21 • MATCHING FACTORS",q:"The ocean temperature and index based on air pressure can help predict ______ in Australia.",opts:["A. Antarctic Circumpolar Current (ACC)","B. katabatic winds","C. rainfall","D. temperature","E. glaciers","F. pressure"],ans:["C"]},
+
+{n:22,type:"Questions 22–26 • MULTIPLE CHOICE",q:"In Paragraph B, the author wants to tell which of the following truth about the Antarctic?",opts:[
+"A. To show Antarctica has been a central topic of global warming in mass media",
+"B. To illustrate its huge sea ice brings food to million lives to places in the world",
+"C. To show it is the heart and its significance to the global climate and current",
+"D. To illustrate it locates in the central spot on Earth geographically"],ans:["C"]},
+{n:23,type:"Questions 22–26 • MULTIPLE CHOICE",q:"Why do Australian farmers keep an eye on the Antarctic ocean temperature?",opts:[
+"A. Help farmers reduce their economic or ecological losses",
+"B. Retrieve grassland decreased in the overgrazing process",
+"C. Prevent animal from dying",
+"D. A cell provides fertilizer for the grassland"],ans:["A"]},
+{n:24,type:"Questions 22–26 • MULTIPLE CHOICE",q:"What is the final effect of katabatic winds?",opts:[
+"A. Increase the moving speed of ocean current",
+"B. Increase salt level near the ocean surface",
+"C. Bring fresh ice into southern oceans",
+"D. Pile up the mountainous ice cap respected by mariners"],ans:["C"]},
+{n:25,type:"Questions 22–26 • MULTIPLE CHOICE",q:"The break of the continental shelf is due to the",opts:[
+"A. Salt and density increase",
+"B. Salt and density decrease",
+"C. Global warming resulting in a rising temperature",
+"D. Fresh ice melting into ocean water"],ans:["C"]},
+{n:26,type:"Questions 22–26 • MULTIPLE CHOICE",q:"The decrease in the number of whales and seabirds is due to",opts:[
+"A. Killer whales are more active around",
+"B. Sea birds are affected by high sea level salty",
+"C. Less sea ice reduces the productivity of food source",
+"D. Seals fail to reproduce babies"],ans:["C"]},
+
+{n:27,type:"Questions 27–32 • YES / NO / NOT GIVEN",q:"Conversations occupy much of our time.",opts:["YES","NO","NOT GIVEN"],ans:["YES"]},
+{n:28,type:"Questions 27–32 • YES / NO / NOT GIVEN",q:"People assess information according to how readily they can understand it.",opts:["YES","NO","NOT GIVEN"],ans:["YES"]},
+{n:29,type:"Questions 27–32 • YES / NO / NOT GIVEN",q:"A quick response to a question is thought to show lack of knowledge.",opts:["YES","NO","NOT GIVEN"],ans:["NO"]},
+{n:30,type:"Questions 27–32 • YES / NO / NOT GIVEN",q:"Video observations have often been used to assess conversational flow.",opts:["YES","NO","NOT GIVEN"],ans:["NOT GIVEN"]},
+{n:31,type:"Questions 27–32 • YES / NO / NOT GIVEN",q:"People who talk less often have clearer ideas than those who talk a lot.",opts:["YES","NO","NOT GIVEN"],ans:["NOT GIVEN"]},
+{n:32,type:"Questions 27–32 • YES / NO / NOT GIVEN",q:"Delays in online chat fail to have the same negative effect as disruptions that occur in natural conversation.",opts:["YES","NO","NOT GIVEN"],ans:["NO"]},
+
+{n:33,type:"Questions 33–40 • NO MORE THAN TWO WORDS",q:"There is a human desire to coordinate ______ in an effort to be ‘in harmony’.",text:true,ans:["behavior","behaviour","activities"]},
+{n:34,type:"Questions 33–40 • NO MORE THAN TWO WORDS",q:"This coordination can be seen in conversations when speakers alter the speed and extent of their speech in order to facilitate ______.",text:true,ans:["turn-taking","turn taking"]},
+{n:35,type:"Questions 33–40 • NO MORE THAN TWO WORDS",q:"This is often achieved within milliseconds: only tiny pauses take place when a conversation flows; when it doesn’t, there are ______ and silences, or people talk at the same time.",text:true,ans:["interruptions"]},
+{n:36,type:"Questions 33–40 • NO MORE THAN TWO WORDS",q:"Our desire to ______ is also an important element of conversation flow.",text:true,ans:["belong"]},
+{n:37,type:"Questions 33–40 • NO MORE THAN TWO WORDS",q:"According to research, our ______ increase even if silences are brief.",text:true,ans:["distress level","distress levels"]},
+{n:38,type:"Questions 33–40 • NO MORE THAN TWO WORDS",q:"Humans have a basic need to be part of a group, and they experience a sense of ______ if silences exclude them.",text:true,ans:["rejection"]},
+{n:39,type:"Questions 33–40 • NO MORE THAN TWO WORDS",q:"People also attempt to coordinate their opinions in conversation. In an experiment, participants’ judgment of the overall ______ among speakers was tested using videos of fluency and a slightly disrupted conversation.",text:true,ans:["agreement"]},
+{n:40,type:"Questions 33–40 • NO MORE THAN TWO WORDS",q:"The results showed that the ______ of the speakers’ discussions was less important than the perceived synchrony of the speakers.",text:true,ans:["content"]}
+];
+
+let cur=0,score=0,answered=new Set(),results={}; let reviewMode=false;
+const quiz=document.getElementById("quiz"), progress=document.getElementById("progress");
+qs.forEach(()=>{let s=document.createElement("div");s.className="seg";progress.appendChild(s)});
+
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function cardHTML(x){
+  let body="";
+  if(x.text){
+    body=`<input class="text" id="input${x.n}" type="text" autocomplete="off" spellcheck="false">
+          <br>`;
+  }else{
+    body=x.opts.map((o,j)=>{
+      let val=o.includes(". ")?o.split(". ")[0]:o;
+      return `<div class="opt" data-q="${x.n}" data-value="${esc(val)}" onclick="choose(${qs.indexOf(x)},this)">${esc(o)}</div>`;
+    }).join("");
+  }
+  return `<div class="type">${esc(x.type)}</div><div class="q">${esc(x.q)}</div>${body}<div class="feedback" id="fb${x.n}"></div>`;
+}
+qs.forEach((x,i)=>{
+  const c=document.createElement("div");c.className="card"+(i===0?" active":"");c.id="card"+x.n;c.innerHTML=cardHTML(x);quiz.appendChild(c);
+});
+qs.forEach((x,i)=>{ if(x.ans && !x.opts) bindTextAutoCheck(i); });
+
+
+function update(){
+  if(reviewMode){
+    document.getElementById("counter").textContent=`Review • Question ${qs[cur].n} / 40`;
+    document.querySelectorAll(".card").forEach((c,i)=>c.classList.toggle("active",i===cur));
+    document.getElementById("summary").style.display="none";
+    document.getElementById("back").style.display="inline-block";
+    document.getElementById("next").style.display="inline-block"; document.getElementById("next").textContent=cur===39?"Finish":"Next";
+    document.getElementById("reviewBack").style.display="inline-block";
+    document.getElementById("back").style.visibility=cur===0?"hidden":"visible";
+    [...progress.children].forEach((s,i)=>s.className="seg "+(i<cur?"done ":"")+(i===cur?"active":""));
+    window.scrollTo({top:0,behavior:"smooth"});
+    return;
+  }
+  document.querySelectorAll(".card").forEach((c,i)=>c.classList.toggle("active",i===cur));
+  document.getElementById("counter").textContent=`Question ${qs[cur].n} / 40`;
+  document.getElementById("summary").style.display="none";
+  document.getElementById("back").style.display="inline-block";
+  document.getElementById("reviewBack").style.display="none";
+  [...progress.children].forEach((s,i)=>s.className="seg "+(i<cur?"done ":"")+(i===cur?"active":""));
+  document.getElementById("back").style.visibility=cur===0?"hidden":"visible";
+  document.getElementById("next").style.display="inline-block";
+  document.getElementById("next").textContent=cur===39?"Finish":"Next";
+  document.getElementById("finishFallback").style.display=cur===39?"block":"none";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function norm(s){return String(s||"").toLowerCase().trim().replace(/[.,!?]/g,"").replace(/\s+/g," ")}
+function showResult(i,correct,user){
+  const x=qs[i],fb=document.getElementById("fb"+x.n);
+  if(correct){
+    score++;
+    fb.className="feedback ok";
+    fb.innerHTML=`✓ <b>Correct answer!</b><br>Your answer: <span class="answer">${esc(user)}</span>`;
+  }else{
+    fb.className="feedback bad";
+    fb.innerHTML=`✕ <b>Incorrect</b><br>Your answer: <span class="answer">${esc(user||"(no answer)")}</span><br>Correct answer: <span class="answer">${esc(x.ans[0])}</span>`;
+  }
+  answered.add(x.n);
+  results[x.n] = {correct, user};
+}
+function choose(i,el){
+  const x=qs[i];if(answered.has(x.n))return;
+  document.querySelectorAll(`[data-q="${x.n}"]`).forEach(o=>o.classList.remove("selected"));
+  el.classList.add("selected");
+  const user=el.dataset.value, correct=x.ans.includes(user);
+  document.querySelectorAll(`[data-q="${x.n}"]`).forEach(o=>{
+    if(x.ans.includes(o.dataset.value))o.classList.add("correct");
+    else if(o===el&&!correct)o.classList.add("wrong");
+  });
+  showResult(i,correct,user);
+}
+function checkText(i){
+  const x=qs[i];if(answered.has(x.n))return;
+  const inp=document.getElementById("input"+x.n),user=inp.value.trim();
+  if(!user)return;
+  const correct=x.ans.some(a=>norm(a)===norm(user));
+  inp.style.borderColor=correct?"#62d57a":"#ff6675";
+  showResult(i,correct,user);
+}
+function bindTextAutoCheck(i){
+  const inp=document.getElementById("input"+qs[i].n);
+  if(!inp)return;
+  inp.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){e.preventDefault();checkText(i);}
+  });
+  inp.addEventListener("blur",()=>checkText(i));
+}
+
+function showSummary(){
+  reviewMode=false;
+  document.querySelectorAll(".card").forEach(c=>c.classList.remove("active"));
+  document.getElementById("summary").style.display="block";
+  document.getElementById("counter").textContent="Score";
+  document.getElementById("back").style.display="none";
+  document.getElementById("next").style.display="none";
+  document.getElementById("reviewBack").style.display="none";
+  document.getElementById("finishFallback").style.display="none";
+  document.querySelectorAll(".seg").forEach(s=>s.className="seg done");
+  const correct=Object.values(results).filter(r=>r.correct).length;
+  const incorrect=Object.values(results).filter(r=>!r.correct).length;
+  const skipped=qs.length-Object.keys(results).length;
+  document.getElementById("scoreText").textContent=`${correct}/40`;
+  document.getElementById("statsText").textContent=`${skipped} skipped · ${incorrect} incorrect`;
+  const grid=document.getElementById("reviewGrid");
+  grid.innerHTML="";
+  qs.forEach((x,i)=>{
+    const b=document.createElement("button");
+    b.className="reviewItem "+(results[x.n]?(results[x.n].correct?"reviewCorrect":"reviewWrong"):"reviewSkipped");
+    b.textContent=x.n;
+    b.title=results[x.n]?(results[x.n].correct?"Correct":"Incorrect"):"Skipped";
+    b.onclick=()=>{
+      cur=i;reviewMode=true;update();
+      const r=results[x.n];
+      if(r){
+        const fb=document.getElementById("fb"+x.n);
+        if(fb) fb.style.display="block";
+      }
+    };
+    grid.appendChild(b);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.getElementById("back").onclick=()=>{
+  if(reviewMode){if(cur>0){cur--;update();}}
+  else if(cur>0){cur--;update();}
+};
+document.getElementById("next").onclick=()=>{
+  if(cur<39){cur++;update();}
+  else{showSummary();}
+};
+document.getElementById("reviewBtn").onclick=()=>{
+  const firstBad=qs.findIndex(x=>results[x.n] && !results[x.n].correct);
+  cur=firstBad>=0?firstBad:0;
+  reviewMode=true;
+  update();
+};
+document.getElementById("reviewBack").onclick=()=>showSummary();
+update();
+</script>
+</body>
+</html>
